@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Bienvenido a TodoApp, {{ user.first_name }}!</h1>
+    
+    <form method="POST" class="mb-8">
+        <div class="mb-4">
+            <label for="note" class="block text-sm font-medium text-gray-700 mb-2">Nueva Nota</label>
+            <textarea id="note" name="note" rows="3" class="outline-none p-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Escribe tu nota aquí..."></textarea>
+        </div>
+        <div>
+            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Agregar Nota
+            </button>
+        </div>
+    </form>
+    
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Tus Notas</h2>
+    <div class="space-y-4">
+        {% for note in user.notes %}
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6 flex justify-between items-center">
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500" id="note-text-{{ note.id }}">{{ note.data }}</p>
+                    <div class="mt-4 flex space-x-2">
+                        <button onclick="editNote('{{ note.id }}')" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Editar
+                        </button>
+                        <button onclick="deleteNote('{{ note.id }}')" class="inline-flex items-center px-2.5 py-1.5 border border-transparent shadow-sm text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+                <div id="edit-form-{{ note.id }}" class="hidden px-4 py-3 bg-gray-50">
+                    <textarea id="edit-note-{{ note.id }}" class="w-full p-2 border rounded" rows="3">{{ note.data }}</textarea>
+                    <div class="mt-2">
+                        <button onclick="saveEdit('{{ note.id }}')" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Guardar
+                        </button>
+                        <button onclick="cancelEdit('{{ note.id }}')" class="ml-2 inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-gray-500">No tienes notas aún. ¡Agrega una arriba!</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function editNote(noteId) {
+    document.getElementById(`edit-form-${noteId}`).classList.remove('hidden');
+    document.getElementById(`note-text-${noteId}`).classList.add('hidden');
+}
+
+function cancelEdit(noteId) {
+    document.getElementById(`edit-form-${noteId}`).classList.add('hidden');
+    document.getElementById(`note-text-${noteId}`).classList.remove('hidden');
+}
+
+function saveEdit(noteId) {
+    const editedNote = document.getElementById(`edit-note-${noteId}`).value;
+    fetch('/edit-note', {
+        method: 'POST',
+        body: JSON.stringify({ noteId: noteId, newContent: editedNote }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`note-text-${noteId}`).textContent = editedNote;
+            cancelEdit(noteId);
+        } else {
+            alert('Error al editar la nota');
+        }
+    });
+}
+
+function deleteNote(noteId) {
+    fetch('/delete-note', {
+        method: 'POST',
+        body: JSON.stringify({ noteId: noteId }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then((_res) => {
+        window.location.href = "/";
+    });
+}
+</script>
+{% endblock %}

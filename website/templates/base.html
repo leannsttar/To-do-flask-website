@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" href="../static/sticky-note.png">
+    <title>{% block title %}Home{% endblock %}</title>
+</head>
+<body>
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-xl font-bold text-gray-800">TodoApp</span>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    {% if user.is_authenticated %}
+                    <a href="/" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/logout" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Logout</a>
+                   
+                    {% else %}
+                    <a href="/login" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                    <a href="/sign-up" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Signup</a>
+
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div id="alert-{{ loop.index }}" class="relative px-4 py-3 mb-4 border rounded-md {% if category == 'error' %}bg-red-100 border-red-400 text-red-700{% else %}bg-green-100 border-green-400 text-green-700{% endif %}" role="alert">
+                    <strong class="font-bold">{{ 'Error' if category == 'error' else 'Success' }}!</strong>
+                    <span class="block sm:inline">{{ message }}</span>
+                    <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                        <svg onclick="closeAlert('alert-{{ loop.index }}')" class="fill-current h-6 w-6 {% if category == 'error' %}text-red-500{% else %}text-green-500{% endif %}" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                    </span>
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="max-w-7xl mx-auto mt-4 px-4 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}        
+    </main>
+
+    <script>
+        function closeAlert(alertId) {
+            document.getElementById(alertId).style.display = 'none';
+        }
+    </script>
+</body>
+</html>
